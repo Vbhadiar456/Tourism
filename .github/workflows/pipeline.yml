@@ -20,8 +20,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r tourism_project/deployment/requirements.txt
-          pip install mlflow huggingface_hub
+          pip install -r requirements.txt
 
       - name: Register raw dataset on HF
         env:
@@ -29,7 +28,7 @@ jobs:
         run: |
           python tourism_project/model_building/02_data_registration.py
 
-  data-prep:
+   data-prep:
     needs: data-registration
     runs-on: ubuntu-latest
     steps:
@@ -41,15 +40,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r tourism_project/deployment/requirements.txt
-          pip install mlflow huggingface_hub
+          pip install -r requirements.txt
 
       - name: Run data preparation
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           python tourism_project/model_building/03_data_prep.py
-
   model-training:
     needs: data-prep
     runs-on: ubuntu-latest
@@ -62,8 +59,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r tourism_project/deployment/requirements.txt
-          pip install mlflow huggingface_hub
+          pip install -r requirements.txt
 
       - name: Train model and register on HF Hub
         env:
@@ -75,15 +71,24 @@ jobs:
     needs: model-training
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
 
       - name: Push current main to Hugging Face Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          git remote add space https://Vbhadiar:$HF_TOKEN@huggingface.co/spaces/Vbhadiar/tourism1-space
+          git remote add space https://Vbhadiar456:$HF_TOKEN@huggingface.co/spaces/Vbhadiar/tourism1-space
           git push --force space main
-
 ```
